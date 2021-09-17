@@ -4,7 +4,7 @@ module.exports = {
       clientsClaim: true,
       skipWaiting: true,
     },
-    name: "Whitestone Holdings, Inc.",
+    name: "Sales Order.",
     themeColor: "#012F53",
     msTileColor: "#ffffff",
     manifestOptions: {
@@ -16,7 +16,7 @@ module.exports = {
   productionSourceMap: process.env.NODE_ENV === "production" ? false : true,
   chainWebpack: (config) => {
     config.plugin("html").tap((args) => {
-      args[0].title = process.env.VUE_APP_TITLE;
+      args[0].title = "Sales Order";
       return args;
     });
   },

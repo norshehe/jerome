@@ -15,7 +15,7 @@ const options = {
   styles: ["https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"],
   timeout: 1000,
   autoClose: false,
-  windowTitle: "Whitestone",
+  windowTitle: "Sales Order",
 };
 
 createApp(App)

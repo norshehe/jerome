@@ -362,7 +362,7 @@
                       <el-option
                         v-for="(item, index) in items"
                         :key="index"
-                        :label="item.productName"
+                        :label="`${item.productName} - (${item.packaging})`"
                         :value="index"
                       ></el-option>
                     </el-select>
@@ -405,9 +405,10 @@
                     class="px-3 py-2 whitespace-nowrap text-right text-sm font-medium"
                   >
                     <el-button
-                      @click="addItem"
-                      icon="el-icon-plus"
-                      type="warning"
+                      :disabled="itemTable.length == 1"
+                      @click="removeItem(tableIndex)"
+                      icon="el-icon-remove"
+                      type="danger"
                       size="small"
                     ></el-button>
                   </td>
@@ -424,6 +425,16 @@
                     class="px-3 py-2 whitespace-nowrap text-right text-sm font-medium"
                   >
                     PHP {{ totalSub }}
+                  </td>
+                  <td
+                    class="px-3 py-2 whitespace-nowrap text-right text-sm font-medium"
+                  >
+                    <el-button
+                      @click="addItem"
+                      icon="el-icon-plus"
+                      type="warning"
+                      size="small"
+                    ></el-button>
                   </td>
                 </tr>
               </tbody>
@@ -508,15 +519,162 @@
         </div>
       </form>
     </div>
-  </div>
-  <div class="flex justify-end my-5">
-    <el-button type="danger">Print</el-button>
+    <div class="flex justify-end my-5">
+      <el-button type="danger" @click="print">Print</el-button>
+    </div>
+    <div class="hidden">
+      <div id="printMe" class="text-gray-800">
+        <h1 class="text-center uppercase font-bold mb-5">Sales Order</h1>
+        <div class="flex col-span-2 gap-3 w-full">
+          <div class="w-full">
+            <h2 class="text-md font-semibold mb-3">Order Information</h2>
+            <table class="w-full text-sm">
+              <tr>
+                <td class="text-left">ID NO</td>
+                <td class="text-right">{{ orderInformation.id }}</td>
+              </tr>
+              <tr>
+                <td class="text-left">Transaction Level</td>
+                <td class="text-right">
+                  {{ orderInformation.transactionType }}
+                </td>
+              </tr>
+              <tr>
+                <td class="text-left">SO Number</td>
+                <td class="text-right">{{ orderInformation.soNumber }}</td>
+              </tr>
+              <tr>
+                <td class="text-left">Transaction Date</td>
+                <td class="text-right">
+                  {{ formatDate(orderInformation.transactionDate) }}
+                </td>
+              </tr>
+              <tr>
+                <td class="text-left">Subtotal</td>
+                <td class="text-right">{{ formatAmount(totalSub) }}</td>
+              </tr>
+              <tr>
+                <td class="text-right">B1T1 Discount</td>
+                <td class="text-right">
+                  {{ formatAmount(orderInformation.b1t1Discount) }}
+                </td>
+              </tr>
+              <tr>
+                <td class="text-right">Shipping fee</td>
+                <td class="text-right">
+                  {{ formatAmount(orderInformation.shippingFee) }}
+                </td>
+              </tr>
+              <tr>
+                <td class="text-left">Grand Total</td>
+                <td class="text-right font-semibold">
+                  {{ formatAmount(grandTotal) }}
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div class="w-full">
+            <h2 class="text-md font-semibold mb-3">Delivery Information</h2>
+            <table class="w-full text-sm">
+              <tr>
+                <td class="text-left">{{ deliveryDetails.name }}</td>
+              </tr>
+              <tr>
+                <td class="text-left">{{ deliveryDetails.contactName }}</td>
+              </tr>
+              <tr>
+                <td class="text-left">{{ deliveryDetails.email }}</td>
+              </tr>
+              <tr>
+                <td class="text-left">{{ deliveryDetails.details }}</td>
+              </tr>
+              <tr>
+                <td class="text-left"></td>
+              </tr>
+
+              <tr>
+                <td class="text-left font-semibold">Shipping Status</td>
+                <td class="text-right">{{ deliveryDetails.shippingStatus }}</td>
+              </tr>
+              <tr>
+                <td class="text-left font-semibold">Waybill no.</td>
+                <td class="text-right">{{ deliveryDetails.billNo }}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        <h2 class="text-md font-semibold text-left mt-5">Item Details</h2>
+        <table class="w-full mt-3 text-sm">
+          <thead>
+            <th class="text-left font-semibold">Item</th>
+            <th class="text-right font-semibold">Price</th>
+            <th class="text-right font-semibold">Qty</th>
+            <th class="text-right font-semibold">Subtotal</th>
+          </thead>
+          <tbody>
+            <tr v-for="(item, index) in itemTable" :key="index">
+              <td class="text-left">
+                {{ items[item.index] ? items[item.index].productName : "" }}
+              </td>
+              <td class="text-right">{{ formatAmount(item.srp) }}</td>
+              <td class="text-right">{{ item.quantity }}</td>
+              <td class="text-right">
+                {{ item.index ? formatAmount(getSubTotal(index)) : "00.0" }}
+              </td>
+            </tr>
+            <tr>
+              <td class="text-right" colspan="3">Subtotal</td>
+
+              <td class="text-right">{{ formatAmount(totalSub) }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="flex col-span-2 gap-3 w-full mt-5">
+          <div class="w-full">
+            <h2 class="text-md font-semibold">Payment Information</h2>
+            <table class="w-full text-sm">
+              <tr>
+                <td class="text-left">Payment Status</td>
+                <td class="text-right">{{ paymentInfo.status }}</td>
+              </tr>
+              <tr>
+                <td class="text-left">PPV Payment</td>
+                <td class="text-right">
+                  {{ formatAmount(paymentInfo.ppvPayment) }}
+                </td>
+              </tr>
+              <tr>
+                <td class="text-left">Total</td>
+                <td class="text-right">
+                  {{ formatAmount(paymentInfo.ppvPayment) }}
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div class="w-full"></div>
+        </div>
+        <div class="flex col-span-2 gap-3 w-full mt-5">
+          <div class="w-full"></div>
+          <div class="w-full">
+            <div class="w-full border border-gray-800 w-3/4"></div>
+            <h2 class="text-center">Approved By</h2>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 <script>
 import { computed, defineComponent, reactive, ref } from "vue";
 import { items } from "@/views/items.js";
+import { format } from "date-fns";
 export default defineComponent({
+  methods: {
+    async print() {
+      // Pass the element id here
+      await this.$htmlToPaper("printMe");
+    },
+  },
   setup() {
     const orderInformation = reactive({
       id: "",
@@ -584,7 +742,23 @@ export default defineComponent({
         total + +orderInformation.shippingFee - +orderInformation.b1t1Discount
       );
     });
+    function withComma(x) {
+      return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+    function formatAmount(amount) {
+      const number = +amount;
+      if (!number) return `0.00`;
+      return `${withComma(number.toFixed(2))}`;
+    }
+    function formatDate(date, dateFormat = "MMM dd, yyyy") {
+      return format(new Date(date), dateFormat);
+    }
+    function removeItem(index) {
+      itemTable.value.splice(index, 1);
+    }
     return {
+      formatDate,
+      removeItem,
       orderInformation,
       grandTotal,
       deliveryDetails,
@@ -595,6 +769,7 @@ export default defineComponent({
       addItem,
       totalSub,
       paymentInfo,
+      formatAmount,
     };
   },
 });
