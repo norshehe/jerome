@@ -12,7 +12,7 @@ module.exports = {
     },
   },
 
-  publicPath: "/",
+  publicPath: "jerome/",
   productionSourceMap: process.env.NODE_ENV === "production" ? false : true,
   chainWebpack: (config) => {
     config.plugin("html").tap((args) => {
